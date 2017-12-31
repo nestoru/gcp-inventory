@@ -27,5 +27,5 @@ TMP_DIR=/tmp \
 - Include ENV VARS in ~/.profile 
 - Cron it, for example at 8 AM on the 1st of every month
 ```
-0 8 1 * * . ~/.profile && cd /tmp && git clone https://github.com/nestoru/gcp-inventory.git && cd gcp-inventory && npm install && node gcp-inventory.js
+0 8 1 * * . ~/.profile && cd /tmp && git clone https://github.com/nestoru/gcp-inventory.git && cd gcp-inventory && git pull && npm install && node gcp-inventory.js
 ```
