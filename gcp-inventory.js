@@ -250,7 +250,6 @@ function sendFileByEmail() {
       {path: tmpCsv, type: 'text/csv', name:csvFileName}
     ]
   };
-  console.log(server);
-  console.log(message);
-  server.send(message, function(err, message) { console.log(err || message); });
+  server.send(message, function(err, message) { if(err) console.log(err); });
+  console.log(`${tmpCsv} sent to ${SMTP_TO}.`);
 }

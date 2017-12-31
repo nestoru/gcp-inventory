@@ -1,0 +1,31 @@
+{
+  "name": "gcp-inventory",
+  "version": "1.0.0",
+  "description": "Simplest gcp inventory from modejs",
+  "main": "gcp-inventory.js",
+  "dependencies": {
+    "@google-cloud/compute": "^0.9.0",
+    "@google-cloud/resource": "^0.8.0",
+    "@google-cloud/storage": "^1.5.1",
+    "emailjs": "^1.0.12",
+    "getenv": "^0.7.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nestoru/gcp-inventory.git"
+  },
+  "keywords": [
+    "GCP",
+    "Inventory"
+  ],
+  "author": "Nestor Urquiza",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nestoru/gcp-inventory/issues"
+  },
+  "homepage": "https://github.com/nestoru/gcp-inventory#readme"
+}
