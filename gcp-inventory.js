@@ -1,7 +1,13 @@
+"use strict";
+
 // Imports the Google Cloud client libraries
 const Resource = require('@google-cloud/resource');
 const Compute = require('@google-cloud/compute');
 const Storage = require('@google-cloud/storage');
+
+// Imports needed because Cloud client libraries do not support IAM listing
+const google = require('googleapis');
+const cloudResourceManager = google.cloudresourcemanager('v1beta1');
 
 // Imports other libraries
 const fs = require('fs');
@@ -35,6 +41,7 @@ const storage = new Storage();
   await listDisks(projects);
   await listSnapshots(projects);
   await listFirewalls(projects); 
+  await listIams(projects);
   await uploadFileToBucket();
   sendFileByEmail()
 })();
@@ -219,7 +226,7 @@ function listFirewalls(projects) {
 
 // Uploads a local file to a bucket
 function uploadFileToBucket() {
-  storagePromise = storage
+  return storage
     .bucket(GCP_BUCKET)
     .upload(tmpCsv)
     .then(() => {
@@ -228,7 +235,83 @@ function uploadFileToBucket() {
     .catch(err => {
       console.error('ERROR:', err);
     });
-  return storagePromise;
+}
+
+
+// List IAMs for all projects. The promise based client API does not expose this so we are forced to wrap callbacks, yuck!
+function listIams(projects) {
+  return new Promise(function(resolve,reject) {
+    const iamPromises = [];
+    authorize().then(function(authClient) {
+      for(let i = 0; i < projects.length; i++) {
+        const project = projects[i].metadata;
+        const projectId = project.projectId;
+	const request = {
+	  resource_: 'projects/' + projectId,
+	  auth: authClient,
+	};
+	const iamPromise = new Promise(function(resolve,reject) {
+	  cloudResourceManager.organizations.getIamPolicy(request, function(err, response) {
+	    if (err) {
+	      console.error(err);
+	      // Even if there is an error we resolve the promise to make sure we get as many IAMs as possible 
+              //   (Promise.all will return as soon as it gets a rejection)
+	      resolve(err);
+	    }
+
+            const userRoles = [];
+            const bindings = response.bindings;
+            for(let i = 0; i < bindings.length; i++) {
+              const role = bindings[i].role.split('/').pop();
+              const members = bindings[i].members;
+              for(let i = 0; i < members.length; i++) {
+                const user = members[i];
+                if(userRoles[user]) {
+                  userRoles[user] += '; ' + role;
+                } else {
+                  userRoles[user] = role;
+                }
+              }
+            }      
+            for (const [key, value] of Object.entries(userRoles)) {
+              const account = key.split(':');
+              const userType = account[0];
+              const user = account[1];
+              const role = value;
+              if(!listIams.iamsHeaderPrinted) {
+		writer.write(',\n');
+		writer.write('IAM - USERS AND ROLES\n');
+		writer.write('projectId,userType,user,role\n');
+		listIams.iamsHeaderPrinted = true;
+	      }
+	      writer.write(projectId + ',' + userType + ',' + user + ',' + role + '\n');
+            }
+	    resolve(response);
+	  });
+	});
+	iamPromises.push(iamPromise);
+      }
+      Promise.all(iamPromises).then(function(results) {
+        resolve(results)
+      });
+    });
+  });
+}
+
+// authorize GCP API. Needed just because the promise based client API does not support IAM listing
+function authorize() {
+  return new Promise(function(resolve,reject){
+    google.auth.getApplicationDefault(function(err, authClient) {
+      if (err) {
+	console.error('authentication failed: ', err);
+      }
+      if (authClient.createScopedRequired && authClient.createScopedRequired()) {
+	const scopes = ['https://www.googleapis.com/auth/cloud-platform'];
+	authClient = authClient.createScoped(scopes);
+      }
+      resolve(authClient);
+    });
+  });
 }
 
 // Emails a local file

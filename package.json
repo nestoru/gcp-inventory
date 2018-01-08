@@ -8,7 +8,8 @@
     "@google-cloud/resource": "^0.8.0",
     "@google-cloud/storage": "^1.5.1",
     "emailjs": "^1.0.12",
-    "getenv": "^0.7.0"
+    "getenv": "^0.7.0",
+    "googleapis": "^23.0.0"
   },
   "devDependencies": {},
   "scripts": {
