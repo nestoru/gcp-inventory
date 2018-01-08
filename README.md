@@ -1,6 +1,9 @@
 # gcp-inventory
 A project aimed at creating the  simplest possible inventory from GCP. It uses a GCS bucket to store a CSV with the audit and SMTP to send the CSV.
 
+## What is audited?
+VMs, Disks, Snapshots, Firewall rules, IAM - Users and roles
+
 ## Install
 ```
 git clone https://github.com/nestoru/gcp-inventory.git
