@@ -1,5 +1,5 @@
 # gcp-inventory
-A project aimed at creating the  simplest possible inventory from GCP
+A project aimed at creating the  simplest possible inventory from GCP. It uses a GCS bucket to store a CSV with the audit and SMTP to send the CSV.
 
 ## Install
 ```
